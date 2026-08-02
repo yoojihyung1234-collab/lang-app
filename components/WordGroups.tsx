@@ -3,6 +3,7 @@
 import { Word } from "@/lib/types";
 import { todayStr } from "@/lib/srs";
 import { createClient } from "@/lib/supabase/client";
+import { groupCountLabel, setLabel, useI18n } from "@/lib/i18n";
 
 type Props = {
   words: Word[];
@@ -46,10 +47,11 @@ function clusterBySession(words: Word[]): { standalone: Word[]; sets: Word[][] }
 }
 
 export default function WordGroups({ words, groupBy, onEdit }: Props) {
+  const { t, locale } = useI18n();
   const today = todayStr();
 
   if (words.length === 0) {
-    return <p className="text-sm text-ink/40 py-6 text-center">아직 수집한 문장이 없어요.</p>;
+    return <p className="text-sm text-ink/40 py-6 text-center">{t.emptyCollection}</p>;
   }
 
   const groups = groupWords(words, groupBy);
@@ -77,7 +79,7 @@ export default function WordGroups({ words, groupBy, onEdit }: Props) {
               play(w.audio_path!);
             }}
             className="absolute bottom-1 right-1.5 text-ink/30 hover:text-ink text-xs"
-            aria-label="발음 재생"
+            aria-label={t.playAudioAria}
           >
             🔊
           </span>
@@ -93,13 +95,13 @@ export default function WordGroups({ words, groupBy, onEdit }: Props) {
         return (
           <div key={key}>
             <p className="text-xs font-medium text-ink/40 mb-2">
-              {key} <span className="text-ink/25">· {groupWords.length}개</span>
+              {key} <span className="text-ink/25">· {groupCountLabel(locale, groupWords.length)}</span>
             </p>
 
             <div className="flex flex-col gap-2">
               {sets.map((setWords) => (
                 <div key={setWords[0].session_id} className="rounded-xl border border-accent/30 bg-accent/5 p-2">
-                  <p className="text-[11px] text-accent/70 mb-1.5 px-0.5">세트 · {setWords.length}개</p>
+                  <p className="text-[11px] text-accent/70 mb-1.5 px-0.5">{setLabel(locale, setWords.length)}</p>
                   <div className="grid grid-cols-5 gap-2">{setWords.map(renderCard)}</div>
                 </div>
               ))}

@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Word } from "@/lib/types";
 import { useLanguages } from "@/lib/useLanguages";
 import { nextBox, nextReviewDate, todayStr } from "@/lib/srs";
+import { useI18n } from "@/lib/i18n";
 import LanguageTabs from "@/components/LanguageTabs";
 import FlashcardReview from "@/components/FlashcardReview";
 
@@ -19,6 +20,7 @@ export default function ReviewPage() {
 }
 
 function ReviewPageContent() {
+  const { t } = useI18n();
   const searchParams = useSearchParams();
   const presetLang = searchParams.get("lang");
   const { languages } = useLanguages();
@@ -74,9 +76,9 @@ function ReviewPageContent() {
   return (
     <div className="pt-4">
       <div className="flex items-center justify-between mb-2">
-        <h1 className="text-lg font-bold">복습</h1>
+        <h1 className="text-lg font-bold">{t.reviewTitle}</h1>
         <Link href="/" className="text-xs text-ink/40 hover:text-ink">
-          수집함으로
+          {t.backToCollection}
         </Link>
       </div>
 

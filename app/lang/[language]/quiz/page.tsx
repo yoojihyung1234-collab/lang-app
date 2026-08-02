@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Word } from "@/lib/types";
 import { buildQuiz, QuizQuestion } from "@/lib/quiz";
+import { questionCountOptionLabel, startQuizLabel, useI18n, weekLabel } from "@/lib/i18n";
 import QuizSession from "@/components/QuizSession";
 
 type Props = { params: { language: string } };
@@ -31,20 +32,8 @@ function dateBucketKey(dateStr: string, granularity: DateGranularity): string {
   return dateStr;
 }
 
-const WEEK_ORDINALS = ["첫째", "둘째", "셋째", "넷째", "다섯째"];
-
-// 그 주의 월요일 날짜를 "7월 첫째 주" 식으로 표기 (월 안에서 며칠에 속하는지로 몇 째 주인지 계산)
-function dateBucketLabel(key: string, granularity: DateGranularity): string {
-  if (granularity === "week") {
-    const d = new Date(key + "T00:00:00");
-    const month = d.getMonth() + 1;
-    const ordinal = WEEK_ORDINALS[Math.ceil(d.getDate() / 7) - 1];
-    return `${month}월 ${ordinal} 주`;
-  }
-  return key;
-}
-
 export default function LanguageQuizPage({ params }: Props) {
+  const { t, locale } = useI18n();
   const language = decodeURIComponent(params.language);
   const [words, setWords] = useState<Word[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,6 +45,11 @@ export default function LanguageQuizPage({ params }: Props) {
   const [count, setCount] = useState<number | "all">(5);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [result, setResult] = useState<{ score: number; total: number } | null>(null);
+
+  function dateBucketLabel(key: string, granularity: DateGranularity): string {
+    if (granularity === "week") return weekLabel(locale, key);
+    return key;
+  }
 
   useEffect(() => {
     async function load() {
@@ -132,7 +126,7 @@ export default function LanguageQuizPage({ params }: Props) {
   if (phase === "result" && result) {
     return (
       <div className="pt-8 flex flex-col items-center gap-4">
-        <p className="text-sm text-ink/40">결과</p>
+        <p className="text-sm text-ink/40">{t.resultLabel}</p>
         <p className="text-4xl font-bold">
           {result.score} / {result.total}
         </p>
@@ -140,23 +134,23 @@ export default function LanguageQuizPage({ params }: Props) {
           onClick={() => setPhase("setup")}
           className="mt-4 text-sm px-4 py-2.5 rounded-lg bg-ink text-white"
         >
-          다시 풀기
+          {t.retry}
         </button>
       </div>
     );
   }
 
   const CATEGORY_LABEL: Record<Category, string> = {
-    topic: "주제별",
-    date: "일자별",
-    starred: "별표만",
-    all: "전체 랜덤",
+    topic: t.categoryTopic,
+    date: t.categoryDate,
+    starred: t.categoryStarred,
+    all: t.categoryAllRandom,
   };
 
   const GRANULARITY_LABEL: Record<DateGranularity, string> = {
-    day: "일별",
-    week: "주별",
-    month: "월별",
+    day: t.granDay,
+    week: t.granWeek,
+    month: t.granMonth,
   };
 
   const selectClass = "text-sm font-medium text-ink bg-transparent text-right focus:outline-none";
@@ -164,7 +158,7 @@ export default function LanguageQuizPage({ params }: Props) {
   return (
     <div className="flex flex-col gap-4">
       <div className="rounded-2xl border border-ink/10 divide-y divide-ink/10">
-        <SettingRow label="범위">
+        <SettingRow label={t.range}>
           <select
             value={category}
             onChange={(e) => selectCategory(e.target.value as Category)}
@@ -179,18 +173,18 @@ export default function LanguageQuizPage({ params }: Props) {
         </SettingRow>
 
         {category === "topic" && (
-          <SettingRow label="주제">
+          <SettingRow label={t.topicPlaceholder}>
             {topics.length === 0 ? (
-              <span className="text-sm text-ink/30">없음</span>
+              <span className="text-sm text-ink/30">{t.none}</span>
             ) : (
               <select
                 value={selectedTopic}
                 onChange={(e) => setSelectedTopic(e.target.value)}
                 className={selectClass}
               >
-                {topics.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
+                {topics.map((tp) => (
+                  <option key={tp} value={tp}>
+                    {tp}
                   </option>
                 ))}
               </select>
@@ -200,7 +194,7 @@ export default function LanguageQuizPage({ params }: Props) {
 
         {category === "date" && (
           <>
-            <SettingRow label="단위">
+            <SettingRow label={t.unit}>
               <select
                 value={dateGranularity}
                 onChange={(e) => selectGranularity(e.target.value as DateGranularity)}
@@ -214,9 +208,9 @@ export default function LanguageQuizPage({ params }: Props) {
               </select>
             </SettingRow>
 
-            <SettingRow label="날짜">
+            <SettingRow label={t.date}>
               {dateBuckets.length === 0 ? (
-                <span className="text-sm text-ink/30">없음</span>
+                <span className="text-sm text-ink/30">{t.none}</span>
               ) : (
                 <select
                   value={selectedDateBucket}
@@ -234,15 +228,15 @@ export default function LanguageQuizPage({ params }: Props) {
           </>
         )}
 
-        <SettingRow label="문제 수">
+        <SettingRow label={t.questionCount}>
           <select
             value={String(count)}
             onChange={(e) => setCount(e.target.value === "all" ? "all" : Number(e.target.value))}
             className={selectClass}
           >
-            {["5", "10", "20", "50", "all"].map((n) => (
+            {(["5", "10", "20", "50", "all"] as const).map((n) => (
               <option key={n} value={n}>
-                {n === "all" ? "전체" : `${n}문제`}
+                {questionCountOptionLabel(locale, n === "all" ? "all" : Number(n))}
               </option>
             ))}
           </select>
@@ -250,10 +244,10 @@ export default function LanguageQuizPage({ params }: Props) {
       </div>
 
       {pool.length === 0 ? (
-        <p className="text-sm text-ink/40 text-center">이 범위에 수집한 문장이 없어요.</p>
+        <p className="text-sm text-ink/40 text-center">{t.emptyRange}</p>
       ) : (
         <button onClick={start} className="text-sm px-4 py-2.5 rounded-lg bg-ink text-white">
-          퀴즈 시작 ({questionCount}문제)
+          {startQuizLabel(locale, questionCount)}
         </button>
       )}
     </div>

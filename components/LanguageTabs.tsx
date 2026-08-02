@@ -1,13 +1,15 @@
 "use client";
 
+import { useI18n } from "@/lib/i18n";
+
 type Props = {
   languages: string[];
   value: string | "all";
   onChange: (value: string | "all") => void;
-  allLabel?: string;
 };
 
-export default function LanguageTabs({ languages, value, onChange, allLabel = "전체" }: Props) {
+export default function LanguageTabs({ languages, value, onChange }: Props) {
+  const { t } = useI18n();
   const options: (string | "all")[] = ["all", ...languages];
 
   return (
@@ -20,7 +22,7 @@ export default function LanguageTabs({ languages, value, onChange, allLabel = "�
             value === opt ? "bg-ink text-white" : "bg-locked text-ink/60 hover:bg-ink/10"
           }`}
         >
-          {opt === "all" ? allLabel : opt}
+          {opt === "all" ? t.allTab : opt}
         </button>
       ))}
     </div>

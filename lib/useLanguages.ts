@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "./supabase/client";
-import { DEFAULT_LANGUAGES } from "./types";
+import { LOCALE_DEFAULT_LANGUAGES, useI18n } from "./i18n";
 
 export function useLanguages() {
-  const [languages, setLanguages] = useState<string[]>(DEFAULT_LANGUAGES);
+  const { locale } = useI18n();
+  const defaultLanguages = LOCALE_DEFAULT_LANGUAGES[locale];
+  const [customLanguages, setCustomLanguages] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -17,19 +19,20 @@ export function useLanguages() {
 
       if (user) {
         const { data } = await supabase.from("languages").select("name").eq("user_id", user.id);
-        const custom = (data ?? []).map((l) => l.name as string);
-        setLanguages([...DEFAULT_LANGUAGES, ...custom.filter((n) => !DEFAULT_LANGUAGES.includes(n))]);
+        setCustomLanguages((data ?? []).map((l) => l.name as string));
       }
       setLoading(false);
     }
     load();
   }, []);
 
+  const languages = [...defaultLanguages, ...customLanguages.filter((n) => !defaultLanguages.includes(n))];
+
   async function addLanguage(name: string) {
     const trimmed = name.trim();
     if (!trimmed || languages.includes(trimmed)) return;
 
-    setLanguages((prev) => [...prev, trimmed]);
+    setCustomLanguages((prev) => [...prev, trimmed]);
 
     const supabase = createClient();
     const {
@@ -39,11 +42,11 @@ export function useLanguages() {
     await supabase.from("languages").insert({ id: crypto.randomUUID(), user_id: user.id, name: trimmed });
   }
 
-  // 기본 3개 언어(영어/독일어/일본어)는 DB에 없는 내장 옵션이라 삭제 대상이 아님 — 직접 추가한 언어만 삭제
+  // 기본 언어 카드는 DB에 없는 내장 옵션이라 삭제 대상이 아님 — 직접 추가한 언어만 삭제
   async function removeLanguage(name: string) {
-    if (DEFAULT_LANGUAGES.includes(name)) return;
+    if (defaultLanguages.includes(name)) return;
 
-    setLanguages((prev) => prev.filter((l) => l !== name));
+    setCustomLanguages((prev) => prev.filter((l) => l !== name));
 
     const supabase = createClient();
     const {
@@ -53,5 +56,5 @@ export function useLanguages() {
     await supabase.from("languages").delete().eq("user_id", user.id).eq("name", name);
   }
 
-  return { languages, loading, addLanguage, removeLanguage };
+  return { languages, defaultLanguages, loading, addLanguage, removeLanguage };
 }

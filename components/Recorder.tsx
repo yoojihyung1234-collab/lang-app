@@ -2,13 +2,15 @@
 
 import { useEffect, useMemo } from "react";
 import { useAudioRecorder } from "@/lib/useAudioRecorder";
+import { useI18n } from "@/lib/i18n";
 
 type Props = {
   onRecorded: (blob: Blob) => void;
 };
 
 export default function Recorder({ onRecorded }: Props) {
-  const { recording, audioBlob, error, start, stop, reset } = useAudioRecorder();
+  const { t } = useI18n();
+  const { recording, audioBlob, permissionDenied, start, stop, reset } = useAudioRecorder();
 
   useEffect(() => {
     if (audioBlob) onRecorded(audioBlob);
@@ -19,7 +21,7 @@ export default function Recorder({ onRecorded }: Props) {
 
   return (
     <div className="flex flex-col items-center gap-3">
-      {error && <p className="text-xs text-bad text-center">{error}</p>}
+      {permissionDenied && <p className="text-xs text-bad text-center">{t.micError}</p>}
 
       {!audioBlob ? (
         <button
@@ -27,7 +29,7 @@ export default function Recorder({ onRecorded }: Props) {
           className={`w-16 h-16 rounded-full flex items-center justify-center text-white text-xl ${
             recording ? "bg-bad" : "bg-ink"
           }`}
-          aria-label={recording ? "녹음 중지" : "녹음 시작"}
+          aria-label={recording ? t.recordStopAria : t.recordStartAria}
         >
           {recording ? "■" : "●"}
         </button>
@@ -36,7 +38,7 @@ export default function Recorder({ onRecorded }: Props) {
           {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
           <audio src={url ?? undefined} controls className="w-64" />
           <button onClick={reset} className="text-xs text-ink/50 hover:text-ink">
-            다시 녹음
+            {t.reRecord}
           </button>
         </div>
       )}

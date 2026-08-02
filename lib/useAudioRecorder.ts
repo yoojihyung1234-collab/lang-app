@@ -5,12 +5,12 @@ import { useRef, useState } from "react";
 export function useAudioRecorder() {
   const [recording, setRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [permissionDenied, setPermissionDenied] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
 
   async function start() {
-    setError(null);
+    setPermissionDenied(false);
     setAudioBlob(null);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -27,7 +27,7 @@ export function useAudioRecorder() {
       mediaRecorderRef.current = recorder;
       setRecording(true);
     } catch {
-      setError("마이크 권한이 필요해요. 브라우저 설정에서 마이크 접근을 허용해주세요.");
+      setPermissionDenied(true);
     }
   }
 
@@ -38,8 +38,8 @@ export function useAudioRecorder() {
 
   function reset() {
     setAudioBlob(null);
-    setError(null);
+    setPermissionDenied(false);
   }
 
-  return { recording, audioBlob, error, start, stop, reset };
+  return { recording, audioBlob, permissionDenied, start, stop, reset };
 }

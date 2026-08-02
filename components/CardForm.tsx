@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Word } from "@/lib/types";
 import { todayStr } from "@/lib/srs";
+import { useI18n } from "@/lib/i18n";
 
 type Props = {
   initial?: Word;
@@ -12,6 +13,7 @@ type Props = {
 };
 
 export default function CardForm({ initial, onSubmit, onCancel, onDelete }: Props) {
+  const { t } = useI18n();
   const [term, setTerm] = useState(initial?.term ?? "");
   const [meaning, setMeaning] = useState(initial?.meaning ?? "");
   const [example, setExample] = useState(initial?.example ?? "");
@@ -37,28 +39,28 @@ export default function CardForm({ initial, onSubmit, onCancel, onDelete }: Prop
         autoFocus
         value={term}
         onChange={(e) => setTerm(e.target.value)}
-        placeholder="문제"
+        placeholder={t.problemPlaceholder}
         rows={3}
         className="notebook-lines text-sm px-3 pt-0 rounded-lg border-0 border-b border-ink/15 focus:outline-none focus:border-ink/40 resize-none"
       />
       <textarea
         value={meaning}
         onChange={(e) => setMeaning(e.target.value)}
-        placeholder="답"
+        placeholder={t.answerPlaceholder}
         rows={3}
         className="notebook-lines text-sm px-3 pt-0 rounded-lg border-0 border-b border-ink/15 focus:outline-none focus:border-ink/40 resize-none"
       />
       <input
         value={example}
         onChange={(e) => setExample(e.target.value)}
-        placeholder="메모 (선택)"
+        placeholder={t.memoPlaceholder}
         className="text-sm px-3 py-2 rounded-lg border border-ink/15 focus:outline-none focus:border-ink/40"
       />
       <div className="flex gap-2">
         <input
           value={topic}
           onChange={(e) => setTopic(e.target.value)}
-          placeholder="주제"
+          placeholder={t.topicPlaceholder}
           className="flex-1 text-sm px-3 py-2 rounded-lg border border-ink/15 focus:outline-none focus:border-ink/40"
         />
         <input
@@ -71,17 +73,17 @@ export default function CardForm({ initial, onSubmit, onCancel, onDelete }: Prop
       <div className="flex justify-between gap-2">
         {initial && onDelete ? (
           <button type="button" onClick={onDelete} className="text-sm px-4 py-2 rounded-lg text-bad hover:bg-bad/10">
-            삭제
+            {t.delete}
           </button>
         ) : (
           <span />
         )}
         <div className="flex gap-2">
           <button type="button" onClick={onCancel} className="text-sm px-4 py-2 rounded-lg text-ink/50 hover:bg-locked">
-            취소
+            {t.cancel}
           </button>
           <button type="submit" className="text-sm px-4 py-2 rounded-lg bg-ink text-white">
-            {initial ? "저장" : "추가"}
+            {initial ? t.save : t.add}
           </button>
         </div>
       </div>

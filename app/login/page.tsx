@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { useI18n } from "@/lib/i18n";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { locale, setLocale, t } = useI18n();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -46,15 +48,22 @@ export default function LoginPage() {
       router.refresh();
       return;
     }
-    setMessage("확인 이메일을 보냈어요. 메일함을 확인해주세요.");
+    setMessage(t.confirmEmailSent);
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="w-full max-w-sm">
-        <h1 className="text-lg font-bold text-ink mb-1">언어 공부</h1>
+      <div className="w-full max-w-sm relative">
+        <button
+          onClick={() => setLocale(locale === "ko" ? "pl" : "ko")}
+          className="absolute -top-10 right-0 text-xs px-3 py-1.5 rounded-full bg-locked text-ink/70 hover:bg-ink/10"
+        >
+          {locale === "ko" ? "PL" : "KO"}
+        </button>
+
+        <h1 className="text-lg font-bold text-ink mb-1">{t.appTitle}</h1>
         <p className="text-sm text-ink/50 mb-6">
-          {mode === "login" ? "로그인하고 학습을 이어가세요" : "새 계정을 만들어 시작하세요"}
+          {mode === "login" ? t.loginSubtitleLogin : t.loginSubtitleSignup}
         </p>
 
         <form onSubmit={submit} className="flex flex-col gap-3">
@@ -64,7 +73,7 @@ export default function LoginPage() {
             autoFocus
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="이메일"
+            placeholder={t.emailPlaceholder}
             className="text-sm px-3 py-2.5 rounded-lg border border-ink/15 focus:outline-none focus:border-ink/40"
           />
           <input
@@ -73,7 +82,7 @@ export default function LoginPage() {
             minLength={6}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="비밀번호 (6자 이상)"
+            placeholder={t.passwordPlaceholder}
             className="text-sm px-3 py-2.5 rounded-lg border border-ink/15 focus:outline-none focus:border-ink/40"
           />
 
@@ -84,7 +93,7 @@ export default function LoginPage() {
             disabled={loading}
             className="text-sm px-3 py-2.5 rounded-lg bg-ink text-white disabled:opacity-40"
           >
-            {loading ? "처리 중..." : mode === "login" ? "로그인" : "회원가입"}
+            {loading ? t.processing : mode === "login" ? t.loginBtn : t.signupBtn}
           </button>
         </form>
 
@@ -95,7 +104,7 @@ export default function LoginPage() {
           }}
           className="mt-4 text-xs text-ink/50 hover:text-ink"
         >
-          {mode === "login" ? "계정이 없으신가요? 회원가입" : "이미 계정이 있으신가요? 로그인"}
+          {mode === "login" ? t.noAccountPrompt : t.hasAccountPrompt}
         </button>
       </div>
     </div>

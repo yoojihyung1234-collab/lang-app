@@ -3,6 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { todayStr } from "@/lib/srs";
+import { recordPrompt, useI18n } from "@/lib/i18n";
 import Recorder from "@/components/Recorder";
 import CardForm from "@/components/CardForm";
 
@@ -11,13 +12,9 @@ type Props = { params: { language: string } };
 type Step = "korean" | "record1" | "compare";
 
 const STEP_ORDER: Step[] = ["korean", "record1", "compare"];
-const STEP_LABEL: Record<Step, string> = {
-  korean: "1. 하고 싶은 말을 한국어로 적기",
-  record1: "2. 외국어로 말하며 녹음하기",
-  compare: "3. 내가 만든 문장과 올바른 문장 비교하고 저장",
-};
 
 export default function RecordDiaryPage({ params }: Props) {
+  const { t, locale } = useI18n();
   const language = decodeURIComponent(params.language);
   const [step, setStep] = useState<Step>("korean");
   const [korean, setKorean] = useState("");
@@ -31,6 +28,12 @@ export default function RecordDiaryPage({ params }: Props) {
   const [quickAdding, setQuickAdding] = useState(false);
   const [quickAddedWords, setQuickAddedWords] = useState<{ term: string; meaning: string }[]>([]);
   const quickSessionIdRef = useRef<string | null>(null);
+
+  const STEP_LABEL: Record<Step, string> = {
+    korean: t.diaryStep1,
+    record1: t.diaryStep2,
+    compare: t.diaryStep3,
+  };
 
   const recording1Url = useMemo(() => (recording1 ? URL.createObjectURL(recording1) : null), [recording1]);
 
@@ -135,28 +138,27 @@ export default function RecordDiaryPage({ params }: Props) {
             onClick={() => setStep("record1")}
             className="self-end text-sm px-4 py-2 rounded-lg bg-ink text-white disabled:opacity-30"
           >
-            다음
+            {t.next}
           </button>
         </div>
       )}
 
       {step === "record1" && (
         <div className="flex flex-col gap-4 items-center">
-          <p className="text-sm text-ink/50 text-center">
-            &ldquo;{korean}&rdquo;<br />
-            를 {language}로 말해보세요
+          <p className="text-sm text-ink/50 text-center whitespace-pre-line">
+            {recordPrompt(locale, korean, language)}
           </p>
           <Recorder onRecorded={setRecording1} />
           <div className="w-full flex justify-between">
             <button onClick={() => setStep("korean")} className="text-sm text-ink/40 hover:text-ink">
-              이전
+              {t.prev}
             </button>
             <button
               disabled={!recording1}
               onClick={() => setStep("compare")}
               className="text-sm px-4 py-2 rounded-lg bg-ink text-white disabled:opacity-30"
             >
-              다음
+              {t.next}
             </button>
           </div>
         </div>
@@ -165,12 +167,12 @@ export default function RecordDiaryPage({ params }: Props) {
       {step === "compare" && (
         <div className="flex flex-col gap-4">
           <div>
-            <p className="text-xs text-ink/40 mb-1">1. 하고 싶었던 말 (한국어)</p>
+            <p className="text-xs text-ink/40 mb-1">{t.diaryKoreanLabel}</p>
             <p className="text-sm rounded-lg bg-locked px-3 py-2">{korean}</p>
           </div>
 
           <div>
-            <p className="text-xs text-ink/40 mb-1">2. 내가 만든 문장</p>
+            <p className="text-xs text-ink/40 mb-1">{t.diaryMySentenceLabel}</p>
             {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
             <audio src={recording1Url ?? undefined} controls className="w-full mb-2" />
             <textarea
@@ -183,7 +185,7 @@ export default function RecordDiaryPage({ params }: Props) {
           </div>
 
           <div>
-            <p className="text-xs text-ink/40 mb-1">3. 올바른 문장</p>
+            <p className="text-xs text-ink/40 mb-1">{t.diaryCorrectLabel}</p>
             <textarea
               value={corrected}
               onChange={(e) => setCorrected(e.target.value)}
@@ -209,7 +211,7 @@ export default function RecordDiaryPage({ params }: Props) {
                 onClick={() => setQuickAdding(true)}
                 className="text-xs px-3 py-1.5 rounded-full bg-locked text-ink/60 hover:bg-ink/10"
               >
-                + 몰랐던 표현 수집함에 추가
+                {t.quickAddPrompt}
               </button>
             )}
           </div>
@@ -219,7 +221,7 @@ export default function RecordDiaryPage({ params }: Props) {
               <input
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
-                placeholder="주제"
+                placeholder={t.topicPlaceholder}
                 className="flex-1 text-sm px-3 py-2 rounded-lg border border-ink/15 focus:outline-none focus:border-ink/40"
               />
               <input
@@ -232,21 +234,21 @@ export default function RecordDiaryPage({ params }: Props) {
 
             <div className="flex justify-between items-center">
               <button onClick={() => setStep("record1")} className="text-sm text-ink/40 hover:text-ink">
-                이전
+                {t.prev}
               </button>
               <button
                 disabled={!myTranscript.trim() || !corrected.trim() || saving}
                 onClick={save}
                 className="text-sm px-4 py-2 rounded-lg bg-ink text-white disabled:opacity-30"
               >
-                {saving ? "저장 중..." : "수집함에 추가"}
+                {saving ? t.savingBtn : t.saveToCollectionBtn}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {saved && <p className="text-xs text-good mt-3 text-center">수집함에 추가됐어요.</p>}
+      {saved && <p className="text-xs text-good mt-3 text-center">{t.savedToast}</p>}
     </div>
   );
 }

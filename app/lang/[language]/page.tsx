@@ -4,12 +4,14 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Word } from "@/lib/types";
 import { todayStr } from "@/lib/srs";
+import { useI18n } from "@/lib/i18n";
 import CardForm from "@/components/CardForm";
 import WordGroups from "@/components/WordGroups";
 
 type Props = { params: { language: string } };
 
 export default function CollectionPage({ params }: Props) {
+  const { t } = useI18n();
   const language = decodeURIComponent(params.language);
   const [words, setWords] = useState<Word[]>([]);
   const [loading, setLoading] = useState(true);
@@ -109,7 +111,7 @@ export default function CollectionPage({ params }: Props) {
             setAdding(true);
           }}
           className="w-7 h-7 shrink-0 rounded-lg border border-dashed border-ink/20 text-sm leading-none text-ink/40 hover:bg-locked mr-1"
-          aria-label="문장 추가"
+          aria-label={t.addSentenceAria}
         >
           +
         </button>
@@ -119,7 +121,7 @@ export default function CollectionPage({ params }: Props) {
             groupBy === "date" ? "bg-ink text-white" : "bg-locked text-ink/60"
           }`}
         >
-          일자별
+          {t.byDate}
         </button>
         <button
           onClick={() => setGroupBy("topic")}
@@ -127,7 +129,7 @@ export default function CollectionPage({ params }: Props) {
             groupBy === "topic" ? "bg-ink text-white" : "bg-locked text-ink/60"
           }`}
         >
-          주제별
+          {t.byTopic}
         </button>
       </div>
 

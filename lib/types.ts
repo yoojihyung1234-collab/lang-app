@@ -1,5 +1,3 @@
-export const DEFAULT_LANGUAGES = ["영어", "독일어", "일본어"];
-
 export type Word = {
   id: string;
   user_id: string;
