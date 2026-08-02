@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css");
+
+body {
+  background: #ffffff;
+  color: #111111;
+  font-family: "Pretendard", sans-serif;
+}
+
+.flip-card {
+  perspective: 1000px;
+}
+
+.flip-card-inner {
+  transition: transform 0.4s;
+  transform-style: preserve-3d;
+}
+
+.flip-card.flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+  backface-visibility: hidden;
+}
+
+.flip-card-back {
+  transform: rotateY(180deg);
+}
+
+.line-clamp-4 {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 공책처럼 가로줄이 반복되는 배경 — 여러 줄 입력창(textarea)에 씀 */
+.notebook-lines {
+  line-height: 1.75rem;
+  background-image: linear-gradient(
+    to bottom,
+    transparent,
+    transparent calc(1.75rem - 1px),
+    rgba(17, 17, 17, 0.15) calc(1.75rem - 1px),
+    rgba(17, 17, 17, 0.15) 1.75rem
+  );
+  background-size: 100% 1.75rem;
+  background-attachment: local;
+}
