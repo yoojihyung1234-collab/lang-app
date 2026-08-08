@@ -7,9 +7,10 @@ import { useI18n } from "@/lib/i18n";
 type Props = {
   questions: QuizQuestion[];
   onFinish: (score: number) => void;
+  onStar: (wordId: string) => void;
 };
 
-export default function QuizSession({ questions, onFinish }: Props) {
+export default function QuizSession({ questions, onFinish, onStar }: Props) {
   const { t } = useI18n();
   const [index, setIndex] = useState(0);
   const [answer, setAnswer] = useState("");
@@ -19,6 +20,11 @@ export default function QuizSession({ questions, onFinish }: Props) {
   const question = questions[index];
 
   function reveal() {
+    setRevealed(true);
+  }
+
+  function markUnsure() {
+    onStar(question.word.id);
     setRevealed(true);
   }
 
@@ -52,13 +58,21 @@ export default function QuizSession({ questions, onFinish }: Props) {
       />
 
       {!revealed ? (
-        <button
-          disabled={!answer.trim()}
-          onClick={reveal}
-          className="mt-4 w-full text-sm px-4 py-2.5 rounded-lg bg-ink text-white disabled:opacity-30"
-        >
-          {t.checkAnswer}
-        </button>
+        <div className="mt-4 flex gap-2">
+          <button
+            disabled={!answer.trim()}
+            onClick={reveal}
+            className="flex-1 text-sm px-4 py-2.5 rounded-lg bg-ink text-white disabled:opacity-30"
+          >
+            {t.checkAnswer}
+          </button>
+          <button
+            onClick={markUnsure}
+            className="flex-1 text-sm px-4 py-2.5 rounded-lg bg-locked text-ink/60 hover:bg-ink/10"
+          >
+            {t.quizUnsure}
+          </button>
+        </div>
       ) : (
         <>
           <div className="mt-4 rounded-lg bg-locked px-3 py-2">

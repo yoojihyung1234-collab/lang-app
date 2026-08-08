@@ -90,7 +90,10 @@ type TranslationKey =
   | "remainingCards"
   | "know"
   | "dontKnow"
-  | "allTab";
+  | "allTab"
+  | "tabStarred"
+  | "quizUnsure"
+  | "emptyStarred";
 
 type Dict = Record<TranslationKey, string>;
 
@@ -173,6 +176,9 @@ const ko: Dict = {
   know: "알아요",
   dontKnow: "몰라요",
   allTab: "전체",
+  tabStarred: "별표",
+  quizUnsure: "잘 모르겠어요",
+  emptyStarred: "아직 별표 표시한 문장이 없어요.",
 };
 
 const pl: Dict = {
@@ -254,6 +260,9 @@ const pl: Dict = {
   know: "Znam",
   dontKnow: "Nie znam",
   allTab: "Wszystkie",
+  tabStarred: "Gwiazdki",
+  quizUnsure: "Nie jestem pewien/pewna",
+  emptyStarred: "Nie masz jeszcze zdań oznaczonych gwiazdką.",
 };
 
 const DICT: Record<Locale, Dict> = { ko, pl };

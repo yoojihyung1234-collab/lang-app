@@ -16,6 +16,7 @@ export default function LanguageLayout({ children, params }: Props) {
     { href: base, label: t.tabCollection },
     { href: `${base}/record-diary`, label: t.tabDiary },
     { href: `${base}/quiz`, label: t.tabQuiz },
+    { href: `${base}/starred`, label: t.tabStarred },
   ];
 
   return (

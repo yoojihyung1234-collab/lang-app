@@ -9,6 +9,7 @@ type Props = {
   words: Word[];
   groupBy: "date" | "topic";
   onEdit: (word: Word) => void;
+  onToggleStar: (word: Word) => void;
 };
 
 function groupWords(words: Word[], groupBy: "date" | "topic"): [string, Word[]][] {
@@ -46,7 +47,7 @@ function clusterBySession(words: Word[]): { standalone: Word[]; sets: Word[][] }
   return { standalone, sets };
 }
 
-export default function WordGroups({ words, groupBy, onEdit }: Props) {
+export default function WordGroups({ words, groupBy, onEdit, onToggleStar }: Props) {
   const { t, locale } = useI18n();
   const today = todayStr();
 
@@ -71,6 +72,16 @@ export default function WordGroups({ words, groupBy, onEdit }: Props) {
         className="relative aspect-square rounded-xl border border-ink/10 p-2 flex items-center justify-center text-center hover:bg-locked bg-bg"
       >
         {due && <span className="absolute top-1.5 left-1.5 text-accent text-xs">●</span>}
+        <span
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleStar(w);
+          }}
+          className={`absolute bottom-1 left-1.5 text-xs ${w.starred ? "text-yellow-400" : "text-ink/15"}`}
+          aria-label={t.starAria}
+        >
+          ★
+        </span>
         <p className="text-xs leading-snug line-clamp-4">{w.term}</p>
         {w.audio_path && (
           <span

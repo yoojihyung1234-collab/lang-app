@@ -117,10 +117,16 @@ export default function LanguageQuizPage({ params }: Props) {
     setPhase("result");
   }
 
+  async function star(wordId: string) {
+    setWords((prev) => prev.map((w) => (w.id === wordId ? { ...w, starred: true } : w)));
+    const supabase = createClient();
+    await supabase.from("words").update({ starred: true }).eq("id", wordId);
+  }
+
   if (loading) return null;
 
   if (phase === "session") {
-    return <QuizSession questions={questions} onFinish={finish} />;
+    return <QuizSession questions={questions} onFinish={finish} onStar={star} />;
   }
 
   if (phase === "result" && result) {

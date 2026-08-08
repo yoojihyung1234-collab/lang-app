@@ -3,21 +3,18 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Word } from "@/lib/types";
-import { todayStr } from "@/lib/srs";
 import { useI18n } from "@/lib/i18n";
 import CardForm from "@/components/CardForm";
 import WordGroups from "@/components/WordGroups";
 
 type Props = { params: { language: string } };
 
-export default function CollectionPage({ params }: Props) {
+export default function StarredPage({ params }: Props) {
   const { t } = useI18n();
   const language = decodeURIComponent(params.language);
   const [words, setWords] = useState<Word[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userId, setUserId] = useState<string | null>(null);
   const [groupBy, setGroupBy] = useState<"date" | "topic">("date");
-  const [adding, setAdding] = useState(false);
   const [editingWord, setEditingWord] = useState<Word | null>(null);
 
   useEffect(() => {
@@ -26,7 +23,6 @@ export default function CollectionPage({ params }: Props) {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      setUserId(user?.id ?? null);
 
       if (user) {
         const { data } = await supabase
@@ -34,6 +30,7 @@ export default function CollectionPage({ params }: Props) {
           .select("*")
           .eq("user_id", user.id)
           .eq("language", language)
+          .eq("starred", true)
           .order("card_date", { ascending: false });
         setWords(data ?? []);
       }
@@ -41,42 +38,6 @@ export default function CollectionPage({ params }: Props) {
     }
     load();
   }, [language]);
-
-  async function addWord(term: string, meaning: string, topic: string, cardDate: string, example: string) {
-    if (!userId) return;
-    const supabase = createClient();
-    const id = crypto.randomUUID();
-    const newWord: Word = {
-      id,
-      user_id: userId,
-      language,
-      term,
-      meaning,
-      example: example || null,
-      topic,
-      card_date: cardDate,
-      box: 1,
-      next_review_date: todayStr(),
-      audio_path: null,
-      starred: false,
-      session_id: null,
-      created_at: new Date().toISOString(),
-    };
-    setWords((prev) => [newWord, ...prev]);
-    setAdding(false);
-    await supabase.from("words").insert({
-      id,
-      user_id: userId,
-      language,
-      term,
-      meaning,
-      example: example || null,
-      topic,
-      card_date: cardDate,
-      box: 1,
-      next_review_date: newWord.next_review_date,
-    });
-  }
 
   async function saveEdit(term: string, meaning: string, topic: string, cardDate: string, example: string) {
     if (!editingWord) return;
@@ -102,7 +63,8 @@ export default function CollectionPage({ params }: Props) {
 
   async function toggleStar(word: Word) {
     const starred = !word.starred;
-    setWords((prev) => prev.map((w) => (w.id === word.id ? { ...w, starred } : w)));
+    // 별표를 해제하면 이 화면(별표 모아보기)에서는 바로 사라짐
+    setWords((prev) => (starred ? prev : prev.filter((w) => w.id !== word.id)));
     const supabase = createClient();
     await supabase.from("words").update({ starred }).eq("id", word.id);
   }
@@ -112,16 +74,6 @@ export default function CollectionPage({ params }: Props) {
   return (
     <div>
       <div className="flex items-center gap-1 mb-4">
-        <button
-          onClick={() => {
-            setEditingWord(null);
-            setAdding(true);
-          }}
-          className="w-7 h-7 shrink-0 rounded-lg border border-dashed border-ink/20 text-sm leading-none text-ink/40 hover:bg-locked mr-1"
-          aria-label={t.addSentenceAria}
-        >
-          +
-        </button>
         <button
           onClick={() => setGroupBy("date")}
           className={`text-xs px-3 py-1.5 rounded-full ${
@@ -140,12 +92,6 @@ export default function CollectionPage({ params }: Props) {
         </button>
       </div>
 
-      {adding && (
-        <div className="mb-3">
-          <CardForm onSubmit={addWord} onCancel={() => setAdding(false)} />
-        </div>
-      )}
-
       {editingWord && (
         <div className="mb-3">
           <CardForm
@@ -160,15 +106,11 @@ export default function CollectionPage({ params }: Props) {
         </div>
       )}
 
-      <WordGroups
-        words={words}
-        groupBy={groupBy}
-        onEdit={(w) => {
-          setAdding(false);
-          setEditingWord(w);
-        }}
-        onToggleStar={toggleStar}
-      />
+      {words.length === 0 ? (
+        <p className="text-sm text-ink/40 py-6 text-center">{t.emptyStarred}</p>
+      ) : (
+        <WordGroups words={words} groupBy={groupBy} onEdit={setEditingWord} onToggleStar={toggleStar} />
+      )}
     </div>
   );
 }
