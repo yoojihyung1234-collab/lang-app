@@ -93,6 +93,7 @@ type TranslationKey =
   | "allTab"
   | "tabStarred"
   | "quizUnsure"
+  | "starThisWord"
   | "emptyStarred";
 
 type Dict = Record<TranslationKey, string>;
@@ -176,8 +177,9 @@ const ko: Dict = {
   know: "알아요",
   dontKnow: "몰라요",
   allTab: "전체",
-  tabStarred: "별표",
+  tabStarred: "☆",
   quizUnsure: "잘 모르겠어요",
+  starThisWord: "별표 표시하기",
   emptyStarred: "아직 별표 표시한 문장이 없어요.",
 };
 
@@ -260,8 +262,9 @@ const pl: Dict = {
   know: "Znam",
   dontKnow: "Nie znam",
   allTab: "Wszystkie",
-  tabStarred: "Gwiazdki",
+  tabStarred: "☆",
   quizUnsure: "Nie jestem pewien/pewna",
+  starThisWord: "Oznacz gwiazdką",
   emptyStarred: "Nie masz jeszcze zdań oznaczonych gwiazdką.",
 };
 

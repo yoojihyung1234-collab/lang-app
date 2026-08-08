@@ -117,16 +117,16 @@ export default function LanguageQuizPage({ params }: Props) {
     setPhase("result");
   }
 
-  async function star(wordId: string) {
-    setWords((prev) => prev.map((w) => (w.id === wordId ? { ...w, starred: true } : w)));
+  async function toggleStar(wordId: string, starred: boolean) {
+    setWords((prev) => prev.map((w) => (w.id === wordId ? { ...w, starred } : w)));
     const supabase = createClient();
-    await supabase.from("words").update({ starred: true }).eq("id", wordId);
+    await supabase.from("words").update({ starred }).eq("id", wordId);
   }
 
   if (loading) return null;
 
   if (phase === "session") {
-    return <QuizSession questions={questions} onFinish={finish} onStar={star} />;
+    return <QuizSession questions={questions} onFinish={finish} onToggleStar={toggleStar} />;
   }
 
   if (phase === "result" && result) {

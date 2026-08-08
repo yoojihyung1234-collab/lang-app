@@ -7,25 +7,39 @@ import { useI18n } from "@/lib/i18n";
 type Props = {
   questions: QuizQuestion[];
   onFinish: (score: number) => void;
-  onStar: (wordId: string) => void;
+  onToggleStar: (wordId: string, starred: boolean) => void;
 };
 
-export default function QuizSession({ questions, onFinish, onStar }: Props) {
+export default function QuizSession({ questions, onFinish, onToggleStar }: Props) {
   const { t } = useI18n();
   const [index, setIndex] = useState(0);
   const [answer, setAnswer] = useState("");
   const [revealed, setRevealed] = useState(false);
   const [score, setScore] = useState(0);
+  const [starredIds, setStarredIds] = useState<Set<string>>(new Set());
 
   const question = questions[index];
+  const isStarred = starredIds.has(question.word.id) || question.word.starred;
 
   function reveal() {
     setRevealed(true);
   }
 
-  function markUnsure() {
-    onStar(question.word.id);
+  function star() {
+    setStarredIds((prev) => new Set(prev).add(question.word.id));
+    onToggleStar(question.word.id, true);
     setRevealed(true);
+  }
+
+  function toggleStarAfterReveal() {
+    const next = !isStarred;
+    setStarredIds((prev) => {
+      const copy = new Set(prev);
+      if (next) copy.add(question.word.id);
+      else copy.delete(question.word.id);
+      return copy;
+    });
+    onToggleStar(question.word.id, next);
   }
 
   function grade(correct: boolean) {
@@ -67,7 +81,7 @@ export default function QuizSession({ questions, onFinish, onStar }: Props) {
             {t.checkAnswer}
           </button>
           <button
-            onClick={markUnsure}
+            onClick={star}
             className="flex-1 text-sm px-4 py-2.5 rounded-lg bg-locked text-ink/60 hover:bg-ink/10"
           >
             {t.quizUnsure}
@@ -80,7 +94,16 @@ export default function QuizSession({ questions, onFinish, onStar }: Props) {
             <p className="text-sm font-medium">{question.word.meaning}</p>
           </div>
 
-          <div className="mt-4 flex gap-3">
+          <button
+            onClick={toggleStarAfterReveal}
+            className={`mt-3 w-full text-sm px-4 py-2.5 rounded-lg border ${
+              isStarred ? "border-yellow-400 text-yellow-500 bg-yellow-50" : "border-ink/15 text-ink/50"
+            }`}
+          >
+            {isStarred ? "★" : "☆"} {t.starThisWord}
+          </button>
+
+          <div className="mt-3 flex gap-3">
             <button
               onClick={() => grade(false)}
               className="flex-1 text-sm px-4 py-2.5 rounded-lg bg-bad/10 text-bad"
