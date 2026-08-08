@@ -16,41 +16,37 @@ export default function QuizSession({ questions, onFinish, onToggleStar }: Props
   const [answer, setAnswer] = useState("");
   const [revealed, setRevealed] = useState(false);
   const [score, setScore] = useState(0);
-  const [starredIds, setStarredIds] = useState<Set<string>>(new Set());
 
   const question = questions[index];
-  const isStarred = starredIds.has(question.word.id) || question.word.starred;
 
   function reveal() {
     setRevealed(true);
   }
 
-  function star() {
-    setStarredIds((prev) => new Set(prev).add(question.word.id));
+  function advance(scoreDelta: number) {
+    const nextScore = score + scoreDelta;
+    if (index + 1 >= questions.length) {
+      onFinish(nextScore);
+      return;
+    }
+    setScore(nextScore);
+    setIndex((i) => i + 1);
+    setAnswer("");
+    setRevealed(false);
+  }
+
+  function markUnsure() {
     onToggleStar(question.word.id, true);
     setRevealed(true);
   }
 
-  function toggleStarAfterReveal() {
-    const next = !isStarred;
-    setStarredIds((prev) => {
-      const copy = new Set(prev);
-      if (next) copy.add(question.word.id);
-      else copy.delete(question.word.id);
-      return copy;
-    });
-    onToggleStar(question.word.id, next);
+  function starAndNext() {
+    onToggleStar(question.word.id, true);
+    advance(0);
   }
 
   function grade(correct: boolean) {
-    if (correct) setScore((s) => s + 1);
-    if (index + 1 >= questions.length) {
-      onFinish(correct ? score + 1 : score);
-      return;
-    }
-    setIndex((i) => i + 1);
-    setAnswer("");
-    setRevealed(false);
+    advance(correct ? 1 : 0);
   }
 
   return (
@@ -81,7 +77,7 @@ export default function QuizSession({ questions, onFinish, onToggleStar }: Props
             {t.checkAnswer}
           </button>
           <button
-            onClick={star}
+            onClick={markUnsure}
             className="flex-1 text-sm px-4 py-2.5 rounded-lg bg-locked text-ink/60 hover:bg-ink/10"
           >
             {t.quizUnsure}
@@ -95,12 +91,10 @@ export default function QuizSession({ questions, onFinish, onToggleStar }: Props
           </div>
 
           <button
-            onClick={toggleStarAfterReveal}
-            className={`mt-3 w-full text-sm px-4 py-2.5 rounded-lg border ${
-              isStarred ? "border-yellow-400 text-yellow-500 bg-yellow-50" : "border-ink/15 text-ink/50"
-            }`}
+            onClick={starAndNext}
+            className="mt-3 w-full text-sm px-4 py-2.5 rounded-lg border border-ink/15 text-ink/50 hover:bg-locked"
           >
-            {isStarred ? "★" : "☆"} {t.starThisWord}
+            ☆ {t.starThisWord}
           </button>
 
           <div className="mt-3 flex gap-3">
