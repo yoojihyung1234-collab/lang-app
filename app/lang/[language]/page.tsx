@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Word } from "@/lib/types";
 import { todayStr } from "@/lib/srs";
@@ -9,6 +9,13 @@ import CardForm from "@/components/CardForm";
 import WordGroups from "@/components/WordGroups";
 
 type Props = { params: { language: string } };
+type View = "topics" | "subtopics" | "dates";
+
+function countBy(words: Word[], key: "topic" | "subtopic"): [string, number][] {
+  const map = new Map<string, number>();
+  for (const w of words) map.set(w[key], (map.get(w[key]) ?? 0) + 1);
+  return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+}
 
 export default function CollectionPage({ params }: Props) {
   const { t } = useI18n();
@@ -16,7 +23,9 @@ export default function CollectionPage({ params }: Props) {
   const [words, setWords] = useState<Word[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
-  const [groupBy, setGroupBy] = useState<"date" | "topic">("date");
+  const [view, setView] = useState<View>("topics");
+  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+  const [selectedSubtopic, setSelectedSubtopic] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   const [editingWord, setEditingWord] = useState<Word | null>(null);
 
@@ -42,7 +51,25 @@ export default function CollectionPage({ params }: Props) {
     load();
   }, [language]);
 
-  async function addWord(term: string, meaning: string, topic: string, cardDate: string, example: string) {
+  const topics = useMemo(() => countBy(words, "topic"), [words]);
+  const wordsInTopic = useMemo(
+    () => (selectedTopic ? words.filter((w) => w.topic === selectedTopic) : []),
+    [words, selectedTopic]
+  );
+  const subtopics = useMemo(() => countBy(wordsInTopic, "subtopic"), [wordsInTopic]);
+  const wordsInSubtopic = useMemo(
+    () => (selectedSubtopic ? wordsInTopic.filter((w) => w.subtopic === selectedSubtopic) : []),
+    [wordsInTopic, selectedSubtopic]
+  );
+
+  async function addWord(
+    term: string,
+    meaning: string,
+    topic: string,
+    subtopic: string,
+    cardDate: string,
+    example: string
+  ) {
     if (!userId) return;
     const supabase = createClient();
     const id = crypto.randomUUID();
@@ -54,6 +81,7 @@ export default function CollectionPage({ params }: Props) {
       meaning,
       example: example || null,
       topic,
+      subtopic,
       card_date: cardDate,
       box: 1,
       next_review_date: todayStr(),
@@ -72,25 +100,33 @@ export default function CollectionPage({ params }: Props) {
       meaning,
       example: example || null,
       topic,
+      subtopic,
       card_date: cardDate,
       box: 1,
       next_review_date: newWord.next_review_date,
     });
   }
 
-  async function saveEdit(term: string, meaning: string, topic: string, cardDate: string, example: string) {
+  async function saveEdit(
+    term: string,
+    meaning: string,
+    topic: string,
+    subtopic: string,
+    cardDate: string,
+    example: string
+  ) {
     if (!editingWord) return;
     const id = editingWord.id;
     setWords((prev) =>
       prev.map((w) =>
-        w.id === id ? { ...w, term, meaning, topic, card_date: cardDate, example: example || null } : w
+        w.id === id ? { ...w, term, meaning, topic, subtopic, card_date: cardDate, example: example || null } : w
       )
     );
     setEditingWord(null);
     const supabase = createClient();
     await supabase
       .from("words")
-      .update({ term, meaning, topic, card_date: cardDate, example: example || null })
+      .update({ term, meaning, topic, subtopic, card_date: cardDate, example: example || null })
       .eq("id", id);
   }
 
@@ -109,60 +145,132 @@ export default function CollectionPage({ params }: Props) {
 
   if (loading) return null;
 
+  const addForm = adding && (
+    <div className="mb-3">
+      <CardForm
+        defaultTopic={selectedTopic ?? undefined}
+        defaultSubtopic={selectedSubtopic ?? undefined}
+        onSubmit={addWord}
+        onCancel={() => setAdding(false)}
+      />
+    </div>
+  );
+
+  const editForm = editingWord && (
+    <div className="mb-3">
+      <CardForm
+        initial={editingWord}
+        onSubmit={saveEdit}
+        onCancel={() => setEditingWord(null)}
+        onDelete={() => {
+          deleteWord(editingWord.id);
+          setEditingWord(null);
+        }}
+      />
+    </div>
+  );
+
+  const addButton = (
+    <button
+      onClick={() => {
+        setEditingWord(null);
+        setAdding(true);
+      }}
+      className="w-7 h-7 shrink-0 rounded-lg border border-dashed border-ink/20 text-sm leading-none text-ink/40 hover:bg-locked"
+      aria-label={t.addSentenceAria}
+    >
+      +
+    </button>
+  );
+
+  if (view === "topics") {
+    return (
+      <div>
+        <div className="mb-4">{addButton}</div>
+        {editForm}
+        {addForm}
+        <div className="grid grid-cols-2 gap-3">
+          {topics.map(([topic, count]) => (
+            <button
+              key={topic}
+              onClick={() => {
+                setSelectedTopic(topic);
+                setView("subtopics");
+              }}
+              className="flex flex-col items-center justify-center h-20 rounded-2xl border border-ink/10 hover:bg-locked"
+            >
+              <span className="text-base font-bold">{topic}</span>
+              <span className="text-xs text-ink/40 mt-0.5">{count}</span>
+            </button>
+          ))}
+        </div>
+        {topics.length === 0 && !adding && (
+          <p className="text-sm text-ink/40 py-6 text-center">{t.emptyCollection}</p>
+        )}
+      </div>
+    );
+  }
+
+  if (view === "subtopics") {
+    return (
+      <div>
+        <div className="flex items-center gap-3 mb-4">
+          <button
+            onClick={() => {
+              setView("topics");
+              setSelectedTopic(null);
+            }}
+            className="text-xs text-ink/40 hover:text-ink"
+          >
+            {t.back}
+          </button>
+          {addButton}
+        </div>
+        <h2 className="text-base font-bold mb-3">{selectedTopic}</h2>
+        {editForm}
+        {addForm}
+        <div className="grid grid-cols-2 gap-3">
+          {subtopics.map(([subtopic, count]) => (
+            <button
+              key={subtopic}
+              onClick={() => {
+                setSelectedSubtopic(subtopic);
+                setView("dates");
+              }}
+              className="flex flex-col items-center justify-center h-20 rounded-2xl border border-ink/10 hover:bg-locked"
+            >
+              <span className="text-base font-bold">{subtopic}</span>
+              <span className="text-xs text-ink/40 mt-0.5">{count}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
-      <div className="flex items-center gap-1 mb-4">
+      <div className="flex items-center gap-3 mb-4">
         <button
           onClick={() => {
-            setEditingWord(null);
-            setAdding(true);
+            setView("subtopics");
+            setSelectedSubtopic(null);
           }}
-          className="w-7 h-7 shrink-0 rounded-lg border border-dashed border-ink/20 text-sm leading-none text-ink/40 hover:bg-locked mr-1"
-          aria-label={t.addSentenceAria}
+          className="text-xs text-ink/40 hover:text-ink"
         >
-          +
+          {t.back}
         </button>
-        <button
-          onClick={() => setGroupBy("date")}
-          className={`text-xs px-3 py-1.5 rounded-full ${
-            groupBy === "date" ? "bg-ink text-white" : "bg-locked text-ink/60"
-          }`}
-        >
-          {t.byDate}
-        </button>
-        <button
-          onClick={() => setGroupBy("topic")}
-          className={`text-xs px-3 py-1.5 rounded-full ${
-            groupBy === "topic" ? "bg-ink text-white" : "bg-locked text-ink/60"
-          }`}
-        >
-          {t.byTopic}
-        </button>
+        {addButton}
       </div>
-
-      {adding && (
-        <div className="mb-3">
-          <CardForm onSubmit={addWord} onCancel={() => setAdding(false)} />
-        </div>
-      )}
-
-      {editingWord && (
-        <div className="mb-3">
-          <CardForm
-            initial={editingWord}
-            onSubmit={saveEdit}
-            onCancel={() => setEditingWord(null)}
-            onDelete={() => {
-              deleteWord(editingWord.id);
-              setEditingWord(null);
-            }}
-          />
-        </div>
-      )}
-
+      <h2 className="text-sm text-ink/40 mb-3">
+        {selectedTopic} <span className="text-ink/25">/</span>{" "}
+        <span className="font-bold text-ink text-base">{selectedSubtopic}</span>
+      </h2>
+      {editForm}
+      {addForm}
       <WordGroups
-        words={words}
-        groupBy={groupBy}
+        words={wordsInSubtopic}
+        groupBy="date"
         onEdit={(w) => {
           setAdding(false);
           setEditingWord(w);

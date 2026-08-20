@@ -6,6 +6,7 @@ export type Word = {
   meaning: string; // 한국어 뜻
   example: string | null;
   topic: string; // 주제 (예: "일상")
+  subtopic: string; // 세부 주제 (주제 안에서 한 단계 더 나눈 분류)
   card_date: string; // YYYY-MM-DD, 사용자가 직접 지정한 날짜
   box: number; // 라이트너 박스 1~5 (높을수록 복습 간격이 김)
   next_review_date: string; // YYYY-MM-DD

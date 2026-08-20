@@ -39,6 +39,8 @@ type TranslationKey =
   | "answerPlaceholder"
   | "memoPlaceholder"
   | "topicPlaceholder"
+  | "subtopicPlaceholder"
+  | "back"
   | "cancel"
   | "save"
   | "delete"
@@ -125,6 +127,8 @@ const ko: Dict = {
   answerPlaceholder: "답",
   memoPlaceholder: "메모 (선택)",
   topicPlaceholder: "주제",
+  subtopicPlaceholder: "세부 주제",
+  back: "← 뒤로",
   cancel: "취소",
   save: "저장",
   delete: "삭제",
@@ -210,6 +214,8 @@ const pl: Dict = {
   answerPlaceholder: "Odpowiedź",
   memoPlaceholder: "Notatka (opcjonalnie)",
   topicPlaceholder: "Temat",
+  subtopicPlaceholder: "Podtemat",
+  back: "← Wstecz",
   cancel: "Anuluj",
   save: "Zapisz",
   delete: "Usuń",

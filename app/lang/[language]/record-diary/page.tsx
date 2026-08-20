@@ -87,6 +87,7 @@ export default function RecordDiaryPage({ params }: Props) {
     term: string,
     meaning: string,
     quickTopic: string,
+    quickSubtopic: string,
     quickDate: string,
     example: string
   ) {
@@ -106,6 +107,7 @@ export default function RecordDiaryPage({ params }: Props) {
       meaning,
       example: example || null,
       topic: quickTopic,
+      subtopic: quickSubtopic,
       card_date: quickDate,
       box: 1,
       next_review_date: todayStr(),

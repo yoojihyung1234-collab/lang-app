@@ -17,6 +17,7 @@ create table if not exists public.words (
   meaning text not null,
   example text,
   topic text not null default '기타',
+  subtopic text not null default '기타',
   card_date date not null default current_date,
   box integer not null default 1,
   next_review_date date not null default current_date,

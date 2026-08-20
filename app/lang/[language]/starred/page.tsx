@@ -39,19 +39,26 @@ export default function StarredPage({ params }: Props) {
     load();
   }, [language]);
 
-  async function saveEdit(term: string, meaning: string, topic: string, cardDate: string, example: string) {
+  async function saveEdit(
+    term: string,
+    meaning: string,
+    topic: string,
+    subtopic: string,
+    cardDate: string,
+    example: string
+  ) {
     if (!editingWord) return;
     const id = editingWord.id;
     setWords((prev) =>
       prev.map((w) =>
-        w.id === id ? { ...w, term, meaning, topic, card_date: cardDate, example: example || null } : w
+        w.id === id ? { ...w, term, meaning, topic, subtopic, card_date: cardDate, example: example || null } : w
       )
     );
     setEditingWord(null);
     const supabase = createClient();
     await supabase
       .from("words")
-      .update({ term, meaning, topic, card_date: cardDate, example: example || null })
+      .update({ term, meaning, topic, subtopic, card_date: cardDate, example: example || null })
       .eq("id", id);
   }
 

@@ -7,28 +7,39 @@ import { useI18n } from "@/lib/i18n";
 
 type Props = {
   initial?: Word;
-  onSubmit: (term: string, meaning: string, topic: string, cardDate: string, example: string) => void;
+  defaultTopic?: string;
+  defaultSubtopic?: string;
+  onSubmit: (term: string, meaning: string, topic: string, subtopic: string, cardDate: string, example: string) => void;
   onCancel: () => void;
   onDelete?: () => void;
 };
 
-export default function CardForm({ initial, onSubmit, onCancel, onDelete }: Props) {
+export default function CardForm({ initial, defaultTopic, defaultSubtopic, onSubmit, onCancel, onDelete }: Props) {
   const { t } = useI18n();
   const [term, setTerm] = useState(initial?.term ?? "");
   const [meaning, setMeaning] = useState(initial?.meaning ?? "");
   const [example, setExample] = useState(initial?.example ?? "");
-  const [topic, setTopic] = useState(initial?.topic ?? "");
+  const [topic, setTopic] = useState(initial?.topic ?? defaultTopic ?? "");
+  const [subtopic, setSubtopic] = useState(initial?.subtopic ?? defaultSubtopic ?? "");
   const [cardDate, setCardDate] = useState(initial?.card_date ?? todayStr());
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!term.trim() || !meaning.trim()) return;
-    onSubmit(term.trim(), meaning.trim(), topic.trim() || "기타", cardDate, example.trim());
+    onSubmit(
+      term.trim(),
+      meaning.trim(),
+      topic.trim() || "기타",
+      subtopic.trim() || "기타",
+      cardDate,
+      example.trim()
+    );
     if (!initial) {
       setTerm("");
       setMeaning("");
       setExample("");
-      setTopic("");
+      setTopic(defaultTopic ?? "");
+      setSubtopic(defaultSubtopic ?? "");
       setCardDate(todayStr());
     }
   }
@@ -64,12 +75,18 @@ export default function CardForm({ initial, onSubmit, onCancel, onDelete }: Prop
           className="flex-1 text-sm px-3 py-2 rounded-lg border border-ink/15 focus:outline-none focus:border-ink/40"
         />
         <input
-          type="date"
-          value={cardDate}
-          onChange={(e) => setCardDate(e.target.value)}
-          className="text-sm px-3 py-2 rounded-lg border border-ink/15 focus:outline-none focus:border-ink/40"
+          value={subtopic}
+          onChange={(e) => setSubtopic(e.target.value)}
+          placeholder={t.subtopicPlaceholder}
+          className="flex-1 text-sm px-3 py-2 rounded-lg border border-ink/15 focus:outline-none focus:border-ink/40"
         />
       </div>
+      <input
+        type="date"
+        value={cardDate}
+        onChange={(e) => setCardDate(e.target.value)}
+        className="text-sm px-3 py-2 rounded-lg border border-ink/15 focus:outline-none focus:border-ink/40"
+      />
       <div className="flex justify-between gap-2">
         {initial && onDelete ? (
           <button type="button" onClick={onDelete} className="text-sm px-4 py-2 rounded-lg text-bad hover:bg-bad/10">
