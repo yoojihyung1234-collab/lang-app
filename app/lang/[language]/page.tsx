@@ -30,6 +30,7 @@ export default function CollectionPage({ params }: Props) {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [adding, setAdding] = useState(false);
+  const [addTargetSubtopic, setAddTargetSubtopic] = useState<string | null>(null);
   const [editingWord, setEditingWord] = useState<Word | null>(null);
 
   useEffect(() => {
@@ -171,6 +172,7 @@ export default function CollectionPage({ params }: Props) {
     <button
       onClick={() => {
         setEditingWord(null);
+        setAddTargetSubtopic(null);
         setAdding(true);
       }}
       className="w-7 h-7 shrink-0 rounded-lg border border-dashed border-ink/20 text-sm leading-none text-ink/40 hover:bg-locked"
@@ -236,6 +238,7 @@ export default function CollectionPage({ params }: Props) {
         <div className="mb-3">
           <CardForm
             defaultTopic={selectedTopic ?? undefined}
+            defaultSubtopic={addTargetSubtopic ?? undefined}
             onSubmit={addWord}
             onCancel={() => setAdding(false)}
           />
@@ -287,6 +290,15 @@ export default function CollectionPage({ params }: Props) {
           setEditingWord(w);
         }}
         onToggleStar={toggleStar}
+        onAddToGroup={
+          detailMode === "subtopic"
+            ? (subtopic) => {
+                setEditingWord(null);
+                setAddTargetSubtopic(subtopic);
+                setAdding(true);
+              }
+            : undefined
+        }
       />
     </div>
   );

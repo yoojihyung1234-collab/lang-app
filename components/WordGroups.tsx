@@ -12,6 +12,7 @@ type Props = {
   groupBy: GroupBy;
   onEdit: (word: Word) => void;
   onToggleStar: (word: Word) => void;
+  onAddToGroup?: (groupKey: string) => void;
 };
 
 function groupWords(words: Word[], groupBy: GroupBy): [string, Word[]][] {
@@ -49,7 +50,7 @@ function clusterBySession(words: Word[]): { standalone: Word[]; sets: Word[][] }
   return { standalone, sets };
 }
 
-export default function WordGroups({ words, groupBy, onEdit, onToggleStar }: Props) {
+export default function WordGroups({ words, groupBy, onEdit, onToggleStar, onAddToGroup }: Props) {
   const { t, locale } = useI18n();
   const today = todayStr();
 
@@ -128,8 +129,19 @@ export default function WordGroups({ words, groupBy, onEdit, onToggleStar }: Pro
                 </div>
               ))}
 
-              {standalone.length > 0 && (
-                <div className="grid grid-cols-5 gap-2">{standalone.map(renderCard)}</div>
+              {(standalone.length > 0 || onAddToGroup) && (
+                <div className="grid grid-cols-5 gap-2">
+                  {standalone.map(renderCard)}
+                  {onAddToGroup && (
+                    <button
+                      onClick={() => onAddToGroup(key)}
+                      className="aspect-square rounded-xl border border-dashed border-ink/20 flex items-center justify-center text-ink/30 hover:bg-locked"
+                      aria-label={t.addSentenceAria}
+                    >
+                      +
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           </div>
