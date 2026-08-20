@@ -105,8 +105,17 @@ export default function WordGroups({ words, groupBy, onEdit, onToggleStar }: Pro
         const { standalone, sets } = clusterBySession(groupWords);
         return (
           <div key={key}>
-            <p className="text-xs font-medium text-ink/40 mb-2">
-              {key} <span className="text-ink/25">· {groupCountLabel(locale, groupWords.length)}</span>
+            <p
+              className={
+                groupBy === "topic"
+                  ? "text-lg font-bold text-ink mb-2"
+                  : "text-xs font-medium text-ink/40 mb-2"
+              }
+            >
+              {key}{" "}
+              <span className={groupBy === "topic" ? "text-sm font-normal text-ink/40" : "text-ink/25"}>
+                · {groupCountLabel(locale, groupWords.length)}
+              </span>
             </p>
 
             <div className="flex flex-col gap-2">
