@@ -5,15 +5,17 @@ import { todayStr } from "@/lib/srs";
 import { createClient } from "@/lib/supabase/client";
 import { groupCountLabel, setLabel, useI18n } from "@/lib/i18n";
 
+type GroupBy = "date" | "topic" | "subtopic";
+
 type Props = {
   words: Word[];
-  groupBy: "date" | "topic";
+  groupBy: GroupBy;
   onEdit: (word: Word) => void;
   onToggleStar: (word: Word) => void;
 };
 
-function groupWords(words: Word[], groupBy: "date" | "topic"): [string, Word[]][] {
-  const key = groupBy === "date" ? "card_date" : "topic";
+function groupWords(words: Word[], groupBy: GroupBy): [string, Word[]][] {
+  const key = groupBy === "date" ? "card_date" : groupBy;
   const map = new Map<string, Word[]>();
   for (const w of words) {
     const k = w[key];
@@ -107,13 +109,13 @@ export default function WordGroups({ words, groupBy, onEdit, onToggleStar }: Pro
           <div key={key}>
             <p
               className={
-                groupBy === "topic"
+                groupBy !== "date"
                   ? "text-lg font-bold text-ink mb-2"
                   : "text-xs font-medium text-ink/40 mb-2"
               }
             >
               {key}{" "}
-              <span className={groupBy === "topic" ? "text-sm font-normal text-ink/40" : "text-ink/25"}>
+              <span className={groupBy !== "date" ? "text-sm font-normal text-ink/40" : "text-ink/25"}>
                 · {groupCountLabel(locale, groupWords.length)}
               </span>
             </p>

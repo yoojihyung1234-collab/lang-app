@@ -9,7 +9,8 @@ import CardForm from "@/components/CardForm";
 import WordGroups from "@/components/WordGroups";
 
 type Props = { params: { language: string } };
-type View = "topics" | "subtopics" | "dates";
+type View = "topics" | "topic-detail";
+type DetailMode = "subtopic" | "date";
 
 function countBy(words: Word[], key: "topic" | "subtopic"): [string, number][] {
   const map = new Map<string, number>();
@@ -25,7 +26,9 @@ export default function CollectionPage({ params }: Props) {
   const [userId, setUserId] = useState<string | null>(null);
   const [view, setView] = useState<View>("topics");
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
-  const [selectedSubtopic, setSelectedSubtopic] = useState<string | null>(null);
+  const [detailMode, setDetailMode] = useState<DetailMode>("subtopic");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [adding, setAdding] = useState(false);
   const [editingWord, setEditingWord] = useState<Word | null>(null);
 
@@ -56,10 +59,15 @@ export default function CollectionPage({ params }: Props) {
     () => (selectedTopic ? words.filter((w) => w.topic === selectedTopic) : []),
     [words, selectedTopic]
   );
-  const subtopics = useMemo(() => countBy(wordsInTopic, "subtopic"), [wordsInTopic]);
-  const wordsInSubtopic = useMemo(
-    () => (selectedSubtopic ? wordsInTopic.filter((w) => w.subtopic === selectedSubtopic) : []),
-    [wordsInTopic, selectedSubtopic]
+
+  const topicDates = wordsInTopic.map((w) => w.card_date);
+  const minDate = topicDates.length ? topicDates.reduce((a, b) => (a < b ? a : b)) : todayStr();
+  const maxDate = topicDates.length ? topicDates.reduce((a, b) => (a > b ? a : b)) : todayStr();
+  const effectiveFrom = dateFrom || minDate;
+  const effectiveTo = dateTo || maxDate;
+  const wordsInRange = useMemo(
+    () => wordsInTopic.filter((w) => w.card_date >= effectiveFrom && w.card_date <= effectiveTo),
+    [wordsInTopic, effectiveFrom, effectiveTo]
   );
 
   async function addWord(
@@ -145,17 +153,6 @@ export default function CollectionPage({ params }: Props) {
 
   if (loading) return null;
 
-  const addForm = adding && (
-    <div className="mb-3">
-      <CardForm
-        defaultTopic={selectedTopic ?? undefined}
-        defaultSubtopic={selectedSubtopic ?? undefined}
-        onSubmit={addWord}
-        onCancel={() => setAdding(false)}
-      />
-    </div>
-  );
-
   const editForm = editingWord && (
     <div className="mb-3">
       <CardForm
@@ -188,14 +185,21 @@ export default function CollectionPage({ params }: Props) {
       <div>
         <div className="mb-4">{addButton}</div>
         {editForm}
-        {addForm}
+        {adding && (
+          <div className="mb-3">
+            <CardForm onSubmit={addWord} onCancel={() => setAdding(false)} />
+          </div>
+        )}
         <div className="grid grid-cols-2 gap-3">
           {topics.map(([topic, count]) => (
             <button
               key={topic}
               onClick={() => {
                 setSelectedTopic(topic);
-                setView("subtopics");
+                setDetailMode("subtopic");
+                setDateFrom("");
+                setDateTo("");
+                setView("topic-detail");
               }}
               className="flex flex-col items-center justify-center h-20 rounded-2xl border border-ink/10 hover:bg-locked"
             >
@@ -211,50 +215,13 @@ export default function CollectionPage({ params }: Props) {
     );
   }
 
-  if (view === "subtopics") {
-    return (
-      <div>
-        <div className="flex items-center gap-3 mb-4">
-          <button
-            onClick={() => {
-              setView("topics");
-              setSelectedTopic(null);
-            }}
-            className="text-xs text-ink/40 hover:text-ink"
-          >
-            {t.back}
-          </button>
-          {addButton}
-        </div>
-        <h2 className="text-base font-bold mb-3">{selectedTopic}</h2>
-        {editForm}
-        {addForm}
-        <div className="grid grid-cols-2 gap-3">
-          {subtopics.map(([subtopic, count]) => (
-            <button
-              key={subtopic}
-              onClick={() => {
-                setSelectedSubtopic(subtopic);
-                setView("dates");
-              }}
-              className="flex flex-col items-center justify-center h-20 rounded-2xl border border-ink/10 hover:bg-locked"
-            >
-              <span className="text-base font-bold">{subtopic}</span>
-              <span className="text-xs text-ink/40 mt-0.5">{count}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div>
       <div className="flex items-center gap-3 mb-4">
         <button
           onClick={() => {
-            setView("subtopics");
-            setSelectedSubtopic(null);
+            setView("topics");
+            setSelectedTopic(null);
           }}
           className="text-xs text-ink/40 hover:text-ink"
         >
@@ -262,15 +229,59 @@ export default function CollectionPage({ params }: Props) {
         </button>
         {addButton}
       </div>
-      <h2 className="text-sm text-ink/40 mb-3">
-        {selectedTopic} <span className="text-ink/25">/</span>{" "}
-        <span className="font-bold text-ink text-base">{selectedSubtopic}</span>
-      </h2>
+      <h2 className="text-base font-bold mb-3">{selectedTopic}</h2>
+
       {editForm}
-      {addForm}
+      {adding && (
+        <div className="mb-3">
+          <CardForm
+            defaultTopic={selectedTopic ?? undefined}
+            onSubmit={addWord}
+            onCancel={() => setAdding(false)}
+          />
+        </div>
+      )}
+
+      <div className="flex items-center gap-1 mb-3">
+        <button
+          onClick={() => setDetailMode("subtopic")}
+          className={`text-xs px-3 py-1.5 rounded-full ${
+            detailMode === "subtopic" ? "bg-ink text-white" : "bg-locked text-ink/60"
+          }`}
+        >
+          {t.subtopicPlaceholder}
+        </button>
+        <button
+          onClick={() => setDetailMode("date")}
+          className={`text-xs px-3 py-1.5 rounded-full ${
+            detailMode === "date" ? "bg-ink text-white" : "bg-locked text-ink/60"
+          }`}
+        >
+          {t.byDate}
+        </button>
+      </div>
+
+      {detailMode === "date" && (
+        <div className="flex items-center gap-2 mb-3">
+          <input
+            type="date"
+            value={effectiveFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            className="text-sm px-3 py-2 rounded-lg border border-ink/15 focus:outline-none focus:border-ink/40"
+          />
+          <span className="text-ink/30">~</span>
+          <input
+            type="date"
+            value={effectiveTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            className="text-sm px-3 py-2 rounded-lg border border-ink/15 focus:outline-none focus:border-ink/40"
+          />
+        </div>
+      )}
+
       <WordGroups
-        words={wordsInSubtopic}
-        groupBy="date"
+        words={detailMode === "date" ? wordsInRange : wordsInTopic}
+        groupBy={detailMode === "date" ? "date" : "subtopic"}
         onEdit={(w) => {
           setAdding(false);
           setEditingWord(w);
