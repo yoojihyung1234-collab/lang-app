@@ -233,7 +233,22 @@ export default function CollectionPage({ params }: Props) {
         </button>
         {addButton}
       </div>
-      <h2 className="text-base font-bold mb-3">{selectedTopic}</h2>
+      <select
+        value={selectedTopic ?? ""}
+        onChange={(e) => {
+          setSelectedTopic(e.target.value);
+          setDetailMode("subtopic");
+          setDateFrom("");
+          setDateTo("");
+        }}
+        className="text-base font-bold mb-3 px-2 py-1 rounded-lg border border-ink/15 bg-transparent focus:outline-none focus:border-ink/40"
+      >
+        {topics.map(([topic]) => (
+          <option key={topic} value={topic}>
+            {topic}
+          </option>
+        ))}
+      </select>
 
       {editForm}
       {adding && (
