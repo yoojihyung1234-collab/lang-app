@@ -56,6 +56,7 @@ export default function CollectionPage({ params }: Props) {
   }, [language]);
 
   const topics = useMemo(() => countBy(words, "topic"), [words]);
+  const topicNames = useMemo(() => topics.map(([tp]) => tp), [topics]);
   const wordsInTopic = useMemo(
     () => (selectedTopic ? words.filter((w) => w.topic === selectedTopic) : []),
     [words, selectedTopic]
@@ -158,6 +159,7 @@ export default function CollectionPage({ params }: Props) {
     <div className="mb-3">
       <CardForm
         initial={editingWord}
+        existingTopics={topicNames}
         onSubmit={saveEdit}
         onCancel={() => setEditingWord(null)}
         onDelete={() => {
@@ -189,7 +191,7 @@ export default function CollectionPage({ params }: Props) {
         {editForm}
         {adding && (
           <div className="mb-3">
-            <CardForm onSubmit={addWord} onCancel={() => setAdding(false)} />
+            <CardForm existingTopics={topicNames} onSubmit={addWord} onCancel={() => setAdding(false)} />
           </div>
         )}
         <div className="grid grid-cols-2 gap-3">
@@ -239,6 +241,7 @@ export default function CollectionPage({ params }: Props) {
           <CardForm
             defaultTopic={selectedTopic ?? undefined}
             defaultSubtopic={addTargetSubtopic ?? undefined}
+            existingTopics={topicNames}
             onSubmit={addWord}
             onCancel={() => setAdding(false)}
           />

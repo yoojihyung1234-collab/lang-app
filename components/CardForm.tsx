@@ -9,12 +9,21 @@ type Props = {
   initial?: Word;
   defaultTopic?: string;
   defaultSubtopic?: string;
+  existingTopics?: string[];
   onSubmit: (term: string, meaning: string, topic: string, subtopic: string, cardDate: string, example: string) => void;
   onCancel: () => void;
   onDelete?: () => void;
 };
 
-export default function CardForm({ initial, defaultTopic, defaultSubtopic, onSubmit, onCancel, onDelete }: Props) {
+export default function CardForm({
+  initial,
+  defaultTopic,
+  defaultSubtopic,
+  existingTopics,
+  onSubmit,
+  onCancel,
+  onDelete,
+}: Props) {
   const { t } = useI18n();
   const [term, setTerm] = useState(initial?.term ?? "");
   const [meaning, setMeaning] = useState(initial?.meaning ?? "");
@@ -46,21 +55,23 @@ export default function CardForm({ initial, defaultTopic, defaultSubtopic, onSub
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-2 p-3 rounded-lg border border-ink/10 mb-4">
-      <textarea
-        autoFocus
-        value={term}
-        onChange={(e) => setTerm(e.target.value)}
-        placeholder={t.problemPlaceholder}
-        rows={3}
-        className="notebook-lines text-sm px-3 pt-0 rounded-lg border-0 border-b border-ink/15 focus:outline-none focus:border-ink/40 resize-none"
-      />
-      <textarea
-        value={meaning}
-        onChange={(e) => setMeaning(e.target.value)}
-        placeholder={t.answerPlaceholder}
-        rows={3}
-        className="notebook-lines text-sm px-3 pt-0 rounded-lg border-0 border-b border-ink/15 focus:outline-none focus:border-ink/40 resize-none"
-      />
+      <div className="flex gap-2">
+        <textarea
+          autoFocus
+          value={term}
+          onChange={(e) => setTerm(e.target.value)}
+          placeholder={t.problemPlaceholder}
+          rows={3}
+          className="notebook-lines flex-1 min-w-0 text-sm px-3 pt-0 rounded-lg border-0 border-b border-ink/15 focus:outline-none focus:border-ink/40 resize-none"
+        />
+        <textarea
+          value={meaning}
+          onChange={(e) => setMeaning(e.target.value)}
+          placeholder={t.answerPlaceholder}
+          rows={3}
+          className="notebook-lines flex-1 min-w-0 text-sm px-3 pt-0 rounded-lg border-0 border-b border-ink/15 focus:outline-none focus:border-ink/40 resize-none"
+        />
+      </div>
       <input
         value={example}
         onChange={(e) => setExample(e.target.value)}
@@ -81,6 +92,22 @@ export default function CardForm({ initial, defaultTopic, defaultSubtopic, onSub
           className="flex-1 text-sm px-3 py-2 rounded-lg border border-ink/15 focus:outline-none focus:border-ink/40"
         />
       </div>
+      {existingTopics && existingTopics.length > 0 && (
+        <div className="flex gap-1 flex-wrap">
+          {existingTopics.map((tp) => (
+            <button
+              key={tp}
+              type="button"
+              onClick={() => setTopic(tp)}
+              className={`text-xs px-2.5 py-1 rounded-full ${
+                topic === tp ? "bg-ink text-white" : "bg-locked text-ink/60 hover:bg-ink/10"
+              }`}
+            >
+              {tp}
+            </button>
+          ))}
+        </div>
+      )}
       <input
         type="date"
         value={cardDate}
