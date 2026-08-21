@@ -211,7 +211,7 @@ export default function RecordDiaryPage({ params }: Props) {
             ) : (
               <button
                 onClick={() => setQuickAdding(true)}
-                className="text-xs px-3 py-1.5 rounded-full bg-locked text-ink/60 hover:bg-ink/10"
+                className="text-sm px-3.5 py-2 rounded-full bg-locked text-ink/60 hover:bg-ink/10"
               >
                 {t.quickAddPrompt}
               </button>

@@ -177,7 +177,7 @@ export default function CollectionPage({ params }: Props) {
         setAddTargetSubtopic(null);
         setAdding(true);
       }}
-      className="w-7 h-7 shrink-0 rounded-lg border border-dashed border-ink/20 text-sm leading-none text-ink/40 hover:bg-locked"
+      className="w-9 h-9 shrink-0 rounded-lg border border-dashed border-ink/20 text-base leading-none text-ink/40 hover:bg-locked"
       aria-label={t.addSentenceAria}
     >
       +
@@ -205,10 +205,10 @@ export default function CollectionPage({ params }: Props) {
                 setDateTo("");
                 setView("topic-detail");
               }}
-              className="flex flex-col items-center justify-center h-20 rounded-2xl border border-ink/10 hover:bg-locked"
+              className="flex flex-col items-center justify-center h-24 rounded-2xl border border-ink/10 hover:bg-locked"
             >
               <span className="text-base font-bold">{topic}</span>
-              <span className="text-xs text-ink/40 mt-0.5">{count}</span>
+              <span className="text-sm text-ink/40 mt-0.5">{count}</span>
             </button>
           ))}
         </div>
@@ -227,7 +227,7 @@ export default function CollectionPage({ params }: Props) {
             setView("topics");
             setSelectedTopic(null);
           }}
-          className="text-xs text-ink/40 hover:text-ink"
+          className="text-sm text-ink/40 hover:text-ink"
         >
           {t.back}
         </button>
@@ -251,7 +251,7 @@ export default function CollectionPage({ params }: Props) {
       <div className="flex items-center gap-1 mb-3">
         <button
           onClick={() => setDetailMode("subtopic")}
-          className={`text-xs px-3 py-1.5 rounded-full ${
+          className={`text-sm px-3.5 py-2 rounded-full ${
             detailMode === "subtopic" ? "bg-ink text-white" : "bg-locked text-ink/60"
           }`}
         >
@@ -259,7 +259,7 @@ export default function CollectionPage({ params }: Props) {
         </button>
         <button
           onClick={() => setDetailMode("date")}
-          className={`text-xs px-3 py-1.5 rounded-full ${
+          className={`text-sm px-3.5 py-2 rounded-full ${
             detailMode === "date" ? "bg-ink text-white" : "bg-locked text-ink/60"
           }`}
         >

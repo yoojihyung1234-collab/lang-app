@@ -72,27 +72,27 @@ export default function WordGroups({ words, groupBy, onEdit, onToggleStar, onAdd
       <button
         key={w.id}
         onClick={() => onEdit(w)}
-        className="relative aspect-square rounded-xl border border-ink/10 p-2 flex items-center justify-center text-center hover:bg-locked bg-bg"
+        className="relative aspect-square rounded-xl border border-ink/10 p-3 flex items-center justify-center text-center hover:bg-locked bg-bg"
       >
-        {due && <span className="absolute top-1.5 left-1.5 text-accent text-xs">●</span>}
+        {due && <span className="absolute top-2 left-2 text-accent text-sm">●</span>}
         <span
           onClick={(e) => {
             e.stopPropagation();
             onToggleStar(w);
           }}
-          className={`absolute bottom-1 left-1.5 text-xs ${w.starred ? "text-yellow-400" : "text-ink/15"}`}
+          className={`absolute bottom-1.5 left-2 text-sm ${w.starred ? "text-yellow-400" : "text-ink/15"}`}
           aria-label={t.starAria}
         >
           ★
         </span>
-        <p className="text-xs leading-snug line-clamp-4">{w.term}</p>
+        <p className="text-sm leading-snug line-clamp-6">{w.term}</p>
         {w.audio_path && (
           <span
             onClick={(e) => {
               e.stopPropagation();
               play(w.audio_path!);
             }}
-            className="absolute bottom-1 right-1.5 text-ink/30 hover:text-ink text-xs"
+            className="absolute bottom-1.5 right-2 text-ink/30 hover:text-ink text-sm"
             aria-label={t.playAudioAria}
           >
             🔊
@@ -112,7 +112,7 @@ export default function WordGroups({ words, groupBy, onEdit, onToggleStar, onAdd
               className={
                 groupBy !== "date"
                   ? "text-lg font-bold text-ink mb-2"
-                  : "text-xs font-medium text-ink/40 mb-2"
+                  : "text-sm font-medium text-ink/40 mb-2"
               }
             >
               {key}{" "}
@@ -125,17 +125,17 @@ export default function WordGroups({ words, groupBy, onEdit, onToggleStar, onAdd
               {sets.map((setWords) => (
                 <div key={setWords[0].session_id} className="rounded-xl border border-accent/30 bg-accent/5 p-2">
                   <p className="text-[11px] text-accent/70 mb-1.5 px-0.5">{setLabel(locale, setWords.length)}</p>
-                  <div className="grid grid-cols-5 gap-2">{setWords.map(renderCard)}</div>
+                  <div className="grid grid-cols-3 gap-2">{setWords.map(renderCard)}</div>
                 </div>
               ))}
 
               {(standalone.length > 0 || onAddToGroup) && (
-                <div className="grid grid-cols-5 gap-2">
+                <div className="grid grid-cols-3 gap-2">
                   {standalone.map(renderCard)}
                   {onAddToGroup && (
                     <button
                       onClick={() => onAddToGroup(key)}
-                      className="aspect-square rounded-xl border border-dashed border-ink/20 flex items-center justify-center text-ink/30 hover:bg-locked"
+                      className="aspect-square rounded-xl border border-dashed border-ink/20 flex items-center justify-center text-ink/30 hover:bg-locked text-2xl"
                       aria-label={t.addSentenceAria}
                     >
                       +

@@ -31,7 +31,7 @@ export default function NavBar() {
         >
           {locale === "ko" ? "PL" : "KO"}
         </button>
-        <button onClick={logout} className="text-xs text-ink/40 hover:text-ink">
+        <button onClick={logout} className="text-sm text-ink/40 hover:text-ink">
           {t.logout}
         </button>
       </div>

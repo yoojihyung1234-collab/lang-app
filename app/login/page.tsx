@@ -56,7 +56,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm relative">
         <button
           onClick={() => setLocale(locale === "ko" ? "pl" : "ko")}
-          className="absolute -top-10 right-0 text-xs px-3 py-1.5 rounded-full bg-locked text-ink/70 hover:bg-ink/10"
+          className="absolute -top-10 right-0 text-sm px-3.5 py-2 rounded-full bg-locked text-ink/70 hover:bg-ink/10"
         >
           {locale === "ko" ? "PL" : "KO"}
         </button>

@@ -83,7 +83,7 @@ export default function StarredPage({ params }: Props) {
       <div className="flex items-center gap-1 mb-4">
         <button
           onClick={() => setGroupBy("date")}
-          className={`text-xs px-3 py-1.5 rounded-full ${
+          className={`text-sm px-3.5 py-2 rounded-full ${
             groupBy === "date" ? "bg-ink text-white" : "bg-locked text-ink/60"
           }`}
         >
@@ -91,7 +91,7 @@ export default function StarredPage({ params }: Props) {
         </button>
         <button
           onClick={() => setGroupBy("topic")}
-          className={`text-xs px-3 py-1.5 rounded-full ${
+          className={`text-sm px-3.5 py-2 rounded-full ${
             groupBy === "topic" ? "bg-ink text-white" : "bg-locked text-ink/60"
           }`}
         >

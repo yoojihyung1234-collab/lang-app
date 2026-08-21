@@ -77,7 +77,7 @@ function ReviewPageContent() {
     <div className="pt-4">
       <div className="flex items-center justify-between mb-2">
         <h1 className="text-lg font-bold">{t.reviewTitle}</h1>
-        <Link href="/" className="text-xs text-ink/40 hover:text-ink">
+        <Link href="/" className="text-sm text-ink/40 hover:text-ink">
           {t.backToCollection}
         </Link>
       </div>

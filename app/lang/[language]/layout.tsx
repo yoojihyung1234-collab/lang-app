@@ -21,7 +21,7 @@ export default function LanguageLayout({ children, params }: Props) {
 
   return (
     <div className="pt-4">
-      <Link href="/" className="text-xs text-ink/40 hover:text-ink">
+      <Link href="/" className="text-sm text-ink/40 hover:text-ink">
         {t.changeLanguage}
       </Link>
       <h1 className="text-lg font-bold mt-1 mb-3">{language}</h1>
@@ -33,7 +33,7 @@ export default function LanguageLayout({ children, params }: Props) {
             <Link
               key={tab.href}
               href={tab.href}
-              className={`text-xs px-3 py-1.5 rounded-full ${
+              className={`text-sm px-3.5 py-2 rounded-full ${
                 active ? "bg-ink text-white" : "bg-locked text-ink/60"
               }`}
             >

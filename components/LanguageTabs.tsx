@@ -18,7 +18,7 @@ export default function LanguageTabs({ languages, value, onChange }: Props) {
         <button
           key={opt}
           onClick={() => onChange(opt)}
-          className={`text-xs px-3 py-1.5 rounded-full ${
+          className={`text-sm px-3.5 py-2 rounded-full ${
             value === opt ? "bg-ink text-white" : "bg-locked text-ink/60 hover:bg-ink/10"
           }`}
         >
