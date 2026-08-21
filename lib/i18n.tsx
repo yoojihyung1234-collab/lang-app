@@ -40,6 +40,7 @@ type TranslationKey =
   | "memoPlaceholder"
   | "topicPlaceholder"
   | "subtopicPlaceholder"
+  | "newTopicOption"
   | "back"
   | "cancel"
   | "save"
@@ -128,6 +129,7 @@ const ko: Dict = {
   memoPlaceholder: "메모 (선택)",
   topicPlaceholder: "주제",
   subtopicPlaceholder: "세부 주제",
+  newTopicOption: "+ 새 주제",
   back: "← 뒤로",
   cancel: "취소",
   save: "저장",
@@ -215,6 +217,7 @@ const pl: Dict = {
   memoPlaceholder: "Notatka (opcjonalnie)",
   topicPlaceholder: "Temat",
   subtopicPlaceholder: "Podtemat",
+  newTopicOption: "+ Nowy temat",
   back: "← Wstecz",
   cancel: "Anuluj",
   save: "Zapisz",

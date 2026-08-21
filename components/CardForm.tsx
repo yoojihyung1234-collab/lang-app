@@ -32,6 +32,10 @@ export default function CardForm({
   const [subtopic, setSubtopic] = useState(initial?.subtopic ?? defaultSubtopic ?? "");
   const [cardDate, setCardDate] = useState(initial?.card_date ?? todayStr());
 
+  const NEW_TOPIC = "__new_topic__";
+  const hasTopicOptions = !!existingTopics && existingTopics.length > 0;
+  const showTopicInput = !hasTopicOptions || !existingTopics!.includes(topic);
+
   function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!term.trim() || !meaning.trim()) return;
@@ -79,12 +83,31 @@ export default function CardForm({
         className="text-sm px-3 py-2 rounded-lg border border-ink/15 focus:outline-none focus:border-ink/40"
       />
       <div className="flex gap-2">
-        <input
-          value={topic}
-          onChange={(e) => setTopic(e.target.value)}
-          placeholder={t.topicPlaceholder}
-          className="flex-1 text-sm px-3 py-2 rounded-lg border border-ink/15 focus:outline-none focus:border-ink/40"
-        />
+        {hasTopicOptions && !showTopicInput ? (
+          <select
+            value={topic}
+            onChange={(e) => {
+              if (e.target.value === NEW_TOPIC) setTopic("");
+              else setTopic(e.target.value);
+            }}
+            className="flex-1 text-sm px-3 py-2 rounded-lg border border-ink/15 focus:outline-none focus:border-ink/40"
+          >
+            {existingTopics!.map((tp) => (
+              <option key={tp} value={tp}>
+                {tp}
+              </option>
+            ))}
+            <option value={NEW_TOPIC}>{t.newTopicOption}</option>
+          </select>
+        ) : (
+          <input
+            autoFocus={hasTopicOptions}
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            placeholder={t.topicPlaceholder}
+            className="flex-1 text-sm px-3 py-2 rounded-lg border border-ink/15 focus:outline-none focus:border-ink/40"
+          />
+        )}
         <input
           value={subtopic}
           onChange={(e) => setSubtopic(e.target.value)}
@@ -92,22 +115,6 @@ export default function CardForm({
           className="flex-1 text-sm px-3 py-2 rounded-lg border border-ink/15 focus:outline-none focus:border-ink/40"
         />
       </div>
-      {existingTopics && existingTopics.length > 0 && (
-        <div className="flex gap-1 flex-wrap">
-          {existingTopics.map((tp) => (
-            <button
-              key={tp}
-              type="button"
-              onClick={() => setTopic(tp)}
-              className={`text-xs px-2.5 py-1 rounded-full ${
-                topic === tp ? "bg-ink text-white" : "bg-locked text-ink/60 hover:bg-ink/10"
-              }`}
-            >
-              {tp}
-            </button>
-          ))}
-        </div>
-      )}
       <input
         type="date"
         value={cardDate}
