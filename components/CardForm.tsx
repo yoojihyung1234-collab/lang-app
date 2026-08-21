@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { Word } from "@/lib/types";
 import { todayStr } from "@/lib/srs";
 import { useI18n } from "@/lib/i18n";
@@ -14,6 +14,20 @@ type Props = {
   onCancel: () => void;
   onDelete?: () => void;
 };
+
+// 내용이 길어도 잘리지 않고 한 번에 다 보이도록 입력한 만큼 세로로 늘어나는 텍스트칸
+function AutoGrowTextarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [props.value]);
+
+  return <textarea ref={ref} {...props} />;
+}
 
 export default function CardForm({
   initial,
@@ -59,21 +73,21 @@ export default function CardForm({
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-2 p-3 rounded-lg border border-ink/10 mb-4">
-      <div className="flex gap-2">
-        <textarea
+      <div className="flex gap-2 items-start">
+        <AutoGrowTextarea
           autoFocus
           value={term}
           onChange={(e) => setTerm(e.target.value)}
           placeholder={t.problemPlaceholder}
           rows={3}
-          className="notebook-lines flex-1 min-w-0 text-sm px-3 pt-0 rounded-lg border-0 border-b border-ink/15 focus:outline-none focus:border-ink/40 resize-none"
+          className="notebook-lines flex-1 min-w-0 text-sm px-3 pt-0 rounded-lg border-0 border-b border-ink/15 focus:outline-none focus:border-ink/40 resize-none overflow-hidden"
         />
-        <textarea
+        <AutoGrowTextarea
           value={meaning}
           onChange={(e) => setMeaning(e.target.value)}
           placeholder={t.answerPlaceholder}
           rows={3}
-          className="notebook-lines flex-1 min-w-0 text-sm px-3 pt-0 rounded-lg border-0 border-b border-ink/15 focus:outline-none focus:border-ink/40 resize-none"
+          className="notebook-lines flex-1 min-w-0 text-sm px-3 pt-0 rounded-lg border-0 border-b border-ink/15 focus:outline-none focus:border-ink/40 resize-none overflow-hidden"
         />
       </div>
       <input
